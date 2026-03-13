@@ -1,0 +1,31 @@
+# Xcode user data
+xcuserdata/
+*.xcuserstate
+*.xcuserdatad/
+
+# Build products
+build/
+DerivedData/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# CocoaPods / SPM
+Pods/
+.build/
+
+# macOS
+.DS_Store
+*.swp
+*~
+
+# App data
+*.store
+
+# IDE / editor
+.idea/
+*.xcworkspace/
+xcshareddata/
+
+# Claude Code
+.claude/
