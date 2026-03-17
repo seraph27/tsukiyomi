@@ -22,7 +22,7 @@ struct TimeBlockConfigView: View {
     @State private var dragOffset: CGFloat = 0
 
     private let categories = ["work", "gaming", "cp", "workout", "break", "study", "sleep", "eat", "other"]
-    private let dayLabels = [(7, "SAT"), (2, "MON"), (3, "TUE"), (4, "WED"), (5, "THU"), (6, "FRI"), (1, "SUN")]
+    private let dayLabels = [(1, "SUN"), (2, "MON"), (3, "TUE"), (4, "WED"), (5, "THU"), (6, "FRI"), (7, "SAT")]
 
     private var blocksForSelectedDay: [TimeBlock] {
         timeBlocks.filter { $0.isActiveOn(weekday: selectedDay) }
@@ -96,6 +96,7 @@ struct TimeBlockConfigView: View {
                         .foregroundColor(selectedDay == day ? CatppuccinMocha.blue : CatppuccinMocha.overlay1)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 5)
+                        .contentShape(Rectangle())
                         .background(
                             selectedDay == day
                                 ? CatppuccinMocha.blue.opacity(0.12)

@@ -9,6 +9,10 @@ struct TrackerConfigView: View {
     @State private var newName = ""
     @State private var newUnit = ""
     @State private var selectedColorIndex = 0
+    @State private var editingType: TrackerTypeConfig?
+    @State private var editName = ""
+    @State private var editUnit = ""
+    @State private var editColorIndex = 0
 
     private let colorOptions: [(name: String, hex: String)] = [
         ("blue", "89b4fa"),
@@ -70,34 +74,78 @@ struct TrackerConfigView: View {
                     }
 
                     ForEach(trackerTypes) { type in
-                        HStack(spacing: 8) {
-                            RoundedRectangle(cornerRadius: 3)
-                                .fill(Color(hex: type.colorHex))
-                                .frame(width: 14, height: 14)
+                        if editingType?.id == type.id {
+                            VStack(spacing: 8) {
+                                TextField("name", text: $editName)
+                                    .textFieldStyle(.roundedBorder)
+                                    .font(.system(.caption, design: .monospaced))
 
-                            Text(type.name)
-                                .font(.system(.caption, design: .monospaced).bold())
-                                .foregroundColor(CatppuccinMocha.text)
+                                TextField("unit (optional)", text: $editUnit)
+                                    .textFieldStyle(.roundedBorder)
+                                    .font(.system(.caption, design: .monospaced))
 
-                            if !type.unit.isEmpty {
-                                Text("(\(type.unit))")
-                                    .font(.system(.caption2, design: .monospaced))
-                                    .foregroundColor(CatppuccinMocha.overlay1)
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 4) {
+                                        ForEach(Array(colorOptions.enumerated()), id: \.offset) { index, opt in
+                                            RoundedRectangle(cornerRadius: 4)
+                                                .fill(Color(hex: opt.hex))
+                                                .frame(width: 20, height: 20)
+                                                .overlay {
+                                                    if editColorIndex == index {
+                                                        RoundedRectangle(cornerRadius: 4)
+                                                            .strokeBorder(.white.opacity(0.8), lineWidth: 2)
+                                                    }
+                                                }
+                                                .onTapGesture { editColorIndex = index }
+                                        }
+                                    }
+                                }
+
+                                HStack(spacing: 12) {
+                                    Button("save") { saveEdit(type) }
+                                        .font(.system(.caption, design: .monospaced).bold())
+                                        .foregroundColor(CatppuccinMocha.green)
+                                        .buttonStyle(.plain)
+
+                                    Button("cancel") { editingType = nil }
+                                        .font(.system(.caption, design: .monospaced))
+                                        .foregroundColor(CatppuccinMocha.overlay1)
+                                        .buttonStyle(.plain)
+                                }
                             }
+                            .padding(12)
+                        } else {
+                            HStack(spacing: 8) {
+                                RoundedRectangle(cornerRadius: 3)
+                                    .fill(Color(hex: type.colorHex))
+                                    .frame(width: 14, height: 14)
 
-                            Spacer()
+                                Text(type.name)
+                                    .font(.system(.caption, design: .monospaced).bold())
+                                    .foregroundColor(CatppuccinMocha.text)
 
-                            Button {
-                                modelContext.delete(type)
-                            } label: {
-                                Image(systemName: "xmark")
-                                    .font(.system(size: 10))
-                                    .foregroundColor(CatppuccinMocha.red.opacity(0.7))
+                                if !type.unit.isEmpty {
+                                    Text("(\(type.unit))")
+                                        .font(.system(.caption2, design: .monospaced))
+                                        .foregroundColor(CatppuccinMocha.overlay1)
+                                }
+
+                                Spacer()
+
+                                Button {
+                                    modelContext.delete(type)
+                                } label: {
+                                    Image(systemName: "xmark")
+                                        .font(.system(size: 10))
+                                        .foregroundColor(CatppuccinMocha.red.opacity(0.7))
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 12)
+                            .contentShape(Rectangle())
+                            .onTapGesture { startEditing(type) }
                         }
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 12)
                     }
                 }
             }
@@ -153,6 +201,32 @@ struct TrackerConfigView: View {
         }
         .frame(width: 380)
         .background(CatppuccinMocha.base.opacity(0.3))
+    }
+
+    private func startEditing(_ type: TrackerTypeConfig) {
+        editingType = type
+        editName = type.name
+        editUnit = type.unit
+        editColorIndex = colorOptions.firstIndex(where: { $0.hex == type.colorHex }) ?? 0
+    }
+
+    private func saveEdit(_ type: TrackerTypeConfig) {
+        let name = editName.trimmingCharacters(in: .whitespaces)
+        guard !name.isEmpty else { return }
+        let oldName = type.name
+        type.name = name
+        type.unit = editUnit.trimmingCharacters(in: .whitespaces)
+        type.colorHex = colorOptions[editColorIndex].hex
+        // Update existing entries that reference the old name
+        if oldName != name {
+            let descriptor = FetchDescriptor<TrackerEntry>(predicate: #Predicate { $0.type == oldName })
+            if let matching = try? modelContext.fetch(descriptor) {
+                for entry in matching {
+                    entry.type = name
+                }
+            }
+        }
+        editingType = nil
     }
 
     private func addTracker() {

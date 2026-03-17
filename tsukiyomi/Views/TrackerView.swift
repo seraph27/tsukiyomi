@@ -9,12 +9,12 @@ struct TrackerView: View {
     @State private var inputText = ""
     @State private var selectedIndex = 0
 
-    private func todayCount(for typeName: String) -> Int {
+    private func todayTotal(for typeName: String) -> Double {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: .now)
         return entries
             .filter { $0.type == typeName && calendar.startOfDay(for: $0.date) == startOfDay }
-            .reduce(0) { $0 + $1.count }
+            .reduce(0) { $0 + $1.effectiveValue }
     }
 
     private var selectedType: TrackerTypeConfig? {
@@ -49,7 +49,7 @@ struct TrackerView: View {
                     let color = Color(hex: type.colorHex)
 
                     VStack(spacing: 2) {
-                        Text("\(todayCount(for: type.name))\(type.unit)")
+                        Text(TrackerEntry.formatValue(todayTotal(for: type.name), unit: type.unit))
                             .font(.system(size: 13, weight: .bold, design: .monospaced))
                         Text(type.name.lowercased())
                             .font(.system(size: 9, design: .monospaced))
@@ -74,7 +74,7 @@ struct TrackerView: View {
 
             if let sel = selectedType {
                 HStack(spacing: 4) {
-                    Text(sel.name.lowercased().prefix(4))
+                    Text(sel.name.lowercased())
                         .font(.system(size: 10, design: .monospaced))
                         .foregroundColor(Color(hex: sel.colorHex).opacity(0.6))
 
@@ -88,18 +88,22 @@ struct TrackerView: View {
             }
         }
         .padding(12)
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .top)
         .background(CatppuccinMocha.surface0.opacity(0.5), in: RoundedRectangle(cornerRadius: 10))
     }
 
     private func addEntry() {
         guard let sel = selectedType else { return }
-        let cleaned = inputText.replacingOccurrences(of: "+", with: "").trimmingCharacters(in: .whitespaces)
-        guard let count = Int(cleaned), count > 0 else {
+        let cleaned = inputText
+            .replacingOccurrences(of: "+", with: "")
+            .replacingOccurrences(of: "–", with: "-")  // en dash
+            .replacingOccurrences(of: "—", with: "-")  // em dash
+            .trimmingCharacters(in: .whitespaces)
+        guard let value = Double(cleaned), value != 0 else {
             inputText = ""
             return
         }
-        modelContext.insert(TrackerEntry(type: sel.name, count: count))
+        modelContext.insert(TrackerEntry(type: sel.name, amount: value))
         inputText = ""
     }
 }

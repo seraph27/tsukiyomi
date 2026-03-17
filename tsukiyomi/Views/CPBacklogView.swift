@@ -16,7 +16,7 @@ struct CPBacklogView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Text("competitive programming")
+                Text("cp backlog")
                     .font(.system(.caption, design: .monospaced).bold())
                     .foregroundColor(CatppuccinMocha.subtext0)
                 Spacer()
@@ -41,6 +41,15 @@ struct CPBacklogView: View {
                             problem.completed = true
                             problem.completedAt = Date()
                             lastCompleted = problem
+                            // Add to problems tracker
+                            modelContext.insert(TrackerEntry(type: "Problems", amount: 1))
+                            // Push to Google Sheet
+                            let p = ParsedProblem(
+                                title: problem.title, url: problem.url,
+                                technique: problem.technique, resource: problem.resource,
+                                isContest: false, date: nil
+                            )
+                            Task { try? await SheetsService.appendProblems([p]) }
                         }
                     } label: {
                         RoundedRectangle(cornerRadius: 3)
@@ -75,6 +84,17 @@ struct CPBacklogView: View {
                     }
 
                     Spacer()
+
+                    Button {
+                        modelContext.delete(problem)
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 7))
+                            .foregroundColor(CatppuccinMocha.red.opacity(0.5))
+                            .frame(width: 16, height: 16)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
                 }
             }
 

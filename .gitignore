@@ -27,5 +27,12 @@ Pods/
 *.xcworkspace/
 xcshareddata/
 
+# Python
+.venv/
+__pycache__/
+
+# Scripts (contain spreadsheet IDs)
+scripts/
+
 # Claude Code
 .claude/

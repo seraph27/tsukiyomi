@@ -58,6 +58,7 @@ struct TodoListView: View {
                     }
                 }
             }
+            .frame(maxHeight: 140)
 
             TextField("add task...", text: $newTodoTitle)
                 .textFieldStyle(.plain)

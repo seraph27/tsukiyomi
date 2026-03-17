@@ -5,6 +5,7 @@ enum AppView {
     case config
     case trackerConfig
     case history
+    case settings
 }
 
 struct MainMenuView: View {
@@ -21,6 +22,8 @@ struct MainMenuView: View {
                 TrackerConfigView(currentView: $currentView)
             case .history:
                 HistoryView(currentView: $currentView)
+            case .settings:
+                SettingsView(currentView: $currentView)
             }
         }
         .frame(width: 420)
@@ -36,13 +39,40 @@ struct DashboardView: View {
             TimeBlockWidget()
 
             HStack(alignment: .top, spacing: 10) {
-                TodoListView()
-                TrackerView(currentView: $currentView)
+                VStack(spacing: 10) {
+                    TodoListView()
+                    DailyNoteView()
+                        .frame(maxHeight: .infinity)
+                }
+
+                VStack(spacing: 10) {
+                    NutritionView()
+                    TrackerView(currentView: $currentView)
+                    AIInputView()
+                }
             }
             .fixedSize(horizontal: false, vertical: true)
 
             CPBacklogView()
 
+            SpotifyCardView()
+
+            // Quick-launch icons
+            HStack(spacing: 12) {
+                Button {
+                    NSWorkspace.shared.open(URL(string: "https://docs.google.com/spreadsheets/d/1YRglBS3ZPArZ-miCc4VXYE1DaSunEHjf4vZVBJ_u2b8/edit")!)
+                } label: {
+                    Image(systemName: "tablecells")
+                        .font(.system(size: 11))
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(CatppuccinMocha.overlay0)
+                .help("cp sheet")
+
+                Spacer()
+            }
+
+            // Footer nav
             HStack(spacing: 16) {
                 Button {
                     currentView = .config
@@ -63,6 +93,15 @@ struct DashboardView: View {
                 .foregroundColor(CatppuccinMocha.overlay1)
 
                 Spacer()
+
+                Button {
+                    currentView = .settings
+                } label: {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 10))
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(CatppuccinMocha.overlay0)
 
                 Button {
                     NSApplication.shared.terminate(nil)
