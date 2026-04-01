@@ -167,7 +167,7 @@ struct HistoryView: View {
 
     private func last14DaysGeneric(for typeName: String) -> [DayData] {
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: .now)
+        let today = calendar.logicalDayStart(for: .now)
         let shortFmt = DateFormatter()
         shortFmt.dateFormat = "dd"
         let fullFmt = DateFormatter()
@@ -175,9 +175,9 @@ struct HistoryView: View {
 
         return (0..<14).reversed().map { offset in
             let day = calendar.date(byAdding: .day, value: -offset, to: today)!
-            let dayStart = calendar.startOfDay(for: day)
+            let dayStart = calendar.logicalDayStart(for: day)
             let total = trackerEntries
-                .filter { $0.type == typeName && calendar.startOfDay(for: $0.date) == dayStart }
+                .filter { $0.type == typeName && calendar.logicalDayStart(for: $0.date) == dayStart }
                 .reduce(0.0) { $0 + $1.effectiveValue }
             return DayData(label: shortFmt.string(from: day), fullLabel: fullFmt.string(from: day), total: total)
         }
@@ -302,7 +302,7 @@ struct HistoryView: View {
 
     private func last14Days(for typeName: String) -> [DayData] {
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: .now)
+        let today = calendar.logicalDayStart(for: .now)
         let shortFmt = DateFormatter()
         shortFmt.dateFormat = "dd"
         let fullFmt = DateFormatter()
@@ -310,9 +310,9 @@ struct HistoryView: View {
 
         return (0..<14).reversed().map { offset in
             let day = calendar.date(byAdding: .day, value: -offset, to: today)!
-            let dayStart = calendar.startOfDay(for: day)
+            let dayStart = calendar.logicalDayStart(for: day)
             let total = trackerEntries
-                .filter { $0.type == typeName && calendar.startOfDay(for: $0.date) == dayStart }
+                .filter { $0.type == typeName && calendar.logicalDayStart(for: $0.date) == dayStart }
                 .reduce(0.0) { $0 + $1.effectiveValue }
             return DayData(label: shortFmt.string(from: day), fullLabel: fullFmt.string(from: day), total: total)
         }

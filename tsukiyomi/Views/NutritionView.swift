@@ -16,9 +16,9 @@ struct NutritionView: View {
     ]
 
     private func todayTotal(for name: String) -> Double {
-        let start = Calendar.current.startOfDay(for: .now)
+        let start = Calendar.current.logicalDayStart(for: .now)
         return entries
-            .filter { $0.type == name && Calendar.current.startOfDay(for: $0.date) == start }
+            .filter { $0.type == name && Calendar.current.logicalDayStart(for: $0.date) == start }
             .reduce(0) { $0 + $1.effectiveValue }
     }
 

@@ -1,5 +1,14 @@
 import SwiftUI
 
+extension Calendar {
+    // Days reset at 1am — anything before 1am counts toward the previous calendar day.
+    func logicalDayStart(for date: Date) -> Date {
+        let midnight = startOfDay(for: date)
+        let oneAM = self.date(byAdding: .hour, value: 1, to: midnight)!
+        return date < oneAM ? self.date(byAdding: .day, value: -1, to: midnight)! : midnight
+    }
+}
+
 extension Color {
     init(hex: String) {
         let hex = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))

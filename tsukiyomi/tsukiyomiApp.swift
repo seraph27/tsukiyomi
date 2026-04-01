@@ -74,6 +74,16 @@ struct tsukiyomiApp: App {
                 UInt32(kVK_ANSI_Semicolon), UInt32(cmdKey),
                 hotKeyID, GetApplicationEventTarget(), 0, &hotkeyRef
             )
+
+            // Close the panel when the user clicks outside of it.
+            NotificationCenter.default.addObserver(
+                forName: NSWindow.didResignKeyNotification,
+                object: nil,
+                queue: .main
+            ) { notification in
+                guard let window = notification.object as? NSPanel else { return }
+                window.orderOut(nil)
+            }
         }
     }
 

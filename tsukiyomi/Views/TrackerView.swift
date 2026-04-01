@@ -11,9 +11,9 @@ struct TrackerView: View {
 
     private func todayTotal(for typeName: String) -> Double {
         let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: .now)
+        let startOfDay = calendar.logicalDayStart(for: .now)
         return entries
-            .filter { $0.type == typeName && calendar.startOfDay(for: $0.date) == startOfDay }
+            .filter { $0.type == typeName && calendar.logicalDayStart(for: $0.date) == startOfDay }
             .reduce(0) { $0 + $1.effectiveValue }
     }
 

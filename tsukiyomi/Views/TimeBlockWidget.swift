@@ -31,7 +31,7 @@ struct TimeBlockWidget: View {
     }
 
     private var todayPomoCount: Int {
-        let start = Calendar.current.startOfDay(for: .now)
+        let start = Calendar.current.logicalDayStart(for: .now)
         return pomodoroSessions.filter { $0.date >= start }.count
     }
 

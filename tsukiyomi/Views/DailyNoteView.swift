@@ -8,13 +8,13 @@ struct DailyNoteView: View {
     @FocusState private var focused: Bool
 
     private var todayNote: DailyNote? {
-        let today = Calendar.current.startOfDay(for: .now)
-        return notes.first { Calendar.current.startOfDay(for: $0.date) == today }
+        let today = Calendar.current.logicalDayStart(for: .now)
+        return notes.first { Calendar.current.logicalDayStart(for: $0.date) == today }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
-            Text("notes")
+            Text("diary")
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
                 .foregroundColor(CatppuccinMocha.overlay0)
 
@@ -24,21 +24,26 @@ struct DailyNoteView: View {
                 .scrollContentBackground(.hidden)
                 .focused($focused)
                 .frame(maxHeight: .infinity)
+                .padding(.leading, -5)
                 .onChange(of: text) { _, _ in
                     save()
                 }
                 .overlay(alignment: .topLeading) {
                     if text.isEmpty {
-                        Text("note...")
+                        Text("entry...")
                             .font(.system(size: 11, design: .monospaced))
                             .foregroundColor(CatppuccinMocha.overlay0)
                             .allowsHitTesting(false)
+                            .padding(.leading, 5)
                     }
                 }
         }
         .padding(8)
         .background(CatppuccinMocha.surface0.opacity(0.4), in: RoundedRectangle(cornerRadius: 8))
         .onAppear {
+            text = todayNote?.content ?? ""
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
             text = todayNote?.content ?? ""
         }
     }

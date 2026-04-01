@@ -7,7 +7,7 @@ final class DailyNote {
     var content: String
 
     init(date: Date = .now, content: String = "") {
-        self.date = Calendar.current.startOfDay(for: date)
+        self.date = Calendar.current.logicalDayStart(for: date)
         self.content = content
     }
 }
