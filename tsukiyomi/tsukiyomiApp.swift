@@ -21,8 +21,48 @@ struct tsukiyomiApp: App {
         do {
             container = try ModelContainer(for: schema)
             seedDefaultTrackers()
+            Self.backupStore()
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
+        }
+    }
+
+    private static func backupStore() {
+        let fm = FileManager.default
+        guard let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first,
+              let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+
+        let storeURL = appSupport.appendingPathComponent("default.store")
+        guard fm.fileExists(atPath: storeURL.path) else { return }
+
+        let backupDir = docs.appendingPathComponent("tsukiyomi_backups")
+        try? fm.createDirectory(at: backupDir, withIntermediateDirectories: true)
+
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        let dateStr = fmt.string(from: .now)
+
+        // One backup per day
+        for suffix in ["", "-wal", "-shm"] {
+            let src = appSupport.appendingPathComponent("default.store\(suffix)")
+            let dst = backupDir.appendingPathComponent("backup_\(dateStr)\(suffix)")
+            guard fm.fileExists(atPath: src.path), !fm.fileExists(atPath: dst.path) else { continue }
+            try? fm.copyItem(at: src, to: dst)
+        }
+
+        // Keep last 7 days
+        let files = (try? fm.contentsOfDirectory(at: backupDir, includingPropertiesForKeys: [.creationDateKey], options: .skipsHiddenFiles)) ?? []
+        let stores = files.filter { $0.lastPathComponent.hasPrefix("backup_") && !$0.lastPathComponent.hasSuffix("-wal") && !$0.lastPathComponent.hasSuffix("-shm") }
+        let sorted = stores.sorted { a, b in
+            let aDate = (try? a.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+            let bDate = (try? b.resourceValues(forKeys: [.creationDateKey]).creationDate) ?? .distantPast
+            return aDate < bDate
+        }
+        for old in sorted.dropLast(7) {
+            let base = old.deletingPathExtension().lastPathComponent
+            for suffix in ["", "-wal", "-shm"] {
+                try? fm.removeItem(at: backupDir.appendingPathComponent("\(base)\(suffix)"))
+            }
         }
     }
 
