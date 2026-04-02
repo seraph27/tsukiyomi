@@ -19,7 +19,8 @@ struct tsukiyomiApp: App {
             PomodoroSession.self
         ])
         do {
-            container = try ModelContainer(for: schema)
+            let config = ModelConfiguration(url: Self.storeURL)
+            container = try ModelContainer(for: schema, configurations: config)
             seedDefaultTrackers()
             Self.backupStore()
         } catch {
@@ -27,12 +28,20 @@ struct tsukiyomiApp: App {
         }
     }
 
+    // Pinned to an absolute path via homeDirectoryForCurrentUser so sandboxing
+    // never redirects it to a different location.
+    static var storeURL: URL {
+        let dir = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/tsukiyomi")
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir.appendingPathComponent("default.store")
+    }
+
     private static func backupStore() {
         let fm = FileManager.default
-        guard let appSupport = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first,
-              let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        guard let docs = fm.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
 
-        let storeURL = appSupport.appendingPathComponent("default.store")
+        let storeURL = Self.storeURL
         guard fm.fileExists(atPath: storeURL.path) else { return }
 
         let backupDir = docs.appendingPathComponent("tsukiyomi_backups")
