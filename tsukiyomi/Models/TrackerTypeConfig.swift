@@ -19,6 +19,7 @@ final class TrackerTypeConfig {
         ("Pushup", "", "89b4fa"),
         ("Squat", "", "a6e3a1"),
         ("Protein", "g", "fab387"),
-        ("Water", "", "89dceb")
+        ("Water", "", "89dceb"),
+        ("Problems", "", "cba6f7")
     ]
 }
