@@ -52,7 +52,7 @@ enum AIService {
     }
 
     Rules:
-    - tracker.type MUST be one of: Pushup, Squat, Protein, Water, Run, Problems (capitalized!)
+    - tracker.type MUST be one of: Pushup, Squat, Protein, Water, Run, Problems, Calories, Fat, Carbs (capitalized!)
     - Water is in ml (250ml, 500ml, 1L = 1000ml). Do NOT convert to cups.
     - Convert km to miles if needed
 
@@ -159,7 +159,8 @@ enum AIService {
 
         if let trackerArr = raw["tracker"] as? [[String: Any]] {
             result.tracker = trackerArr.map { t in
-                ParsedTracker(type: t["type"] as? String ?? "", amount: t["amount"] as? Double ?? 0)
+                let amount = (t["amount"] as? NSNumber)?.doubleValue ?? 0
+                return ParsedTracker(type: t["type"] as? String ?? "", amount: amount)
             }
         }
 

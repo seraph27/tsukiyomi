@@ -32,8 +32,10 @@ struct tsukiyomiApp: App {
                 .environment(appState)
                 .modelContainer(container)
         } label: {
-            Text("月")
-                .font(.system(size: 13, weight: .semibold, design: .serif))
+            Image("MenuBarIcon")
+                .resizable()
+                .frame(width: 18, height: 18)
+                .clipShape(Circle())
         }
         .menuBarExtraStyle(.window)
     }
