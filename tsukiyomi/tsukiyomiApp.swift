@@ -53,7 +53,7 @@ struct tsukiyomiApp: App {
 
         // One backup per day
         for suffix in ["", "-wal", "-shm"] {
-            let src = appSupport.appendingPathComponent("default.store\(suffix)")
+            let src = storeURL.deletingLastPathComponent().appendingPathComponent("default.store\(suffix)")
             let dst = backupDir.appendingPathComponent("backup_\(dateStr)\(suffix)")
             guard fm.fileExists(atPath: src.path), !fm.fileExists(atPath: dst.path) else { continue }
             try? fm.copyItem(at: src, to: dst)
