@@ -175,9 +175,8 @@ struct HistoryView: View {
 
         return (0..<14).reversed().map { offset in
             let day = calendar.date(byAdding: .day, value: -offset, to: today)!
-            let dayStart = calendar.logicalDayStart(for: day)
             let total = trackerEntries
-                .filter { $0.type == typeName && calendar.logicalDayStart(for: $0.date) == dayStart }
+                .filter { $0.type == typeName && calendar.logicalDayStart(for: $0.date) == day }
                 .reduce(0.0) { $0 + $1.effectiveValue }
             return DayData(label: shortFmt.string(from: day), fullLabel: fullFmt.string(from: day), total: total)
         }
@@ -310,9 +309,8 @@ struct HistoryView: View {
 
         return (0..<14).reversed().map { offset in
             let day = calendar.date(byAdding: .day, value: -offset, to: today)!
-            let dayStart = calendar.logicalDayStart(for: day)
             let total = trackerEntries
-                .filter { $0.type == typeName && calendar.logicalDayStart(for: $0.date) == dayStart }
+                .filter { $0.type == typeName && calendar.logicalDayStart(for: $0.date) == day }
                 .reduce(0.0) { $0 + $1.effectiveValue }
             return DayData(label: shortFmt.string(from: day), fullLabel: fullFmt.string(from: day), total: total)
         }
